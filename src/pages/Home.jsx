@@ -2,8 +2,6 @@ import '../App.css'
 import Header from "../components/Header";
 import GeneralInfo from "../components/GeneralInfo";
 import Slider from '../components/Slider';
-import { Calendar, Copa, RightArrow } from '../components/Icons';
-import { Link } from 'react-router-dom';
 import NextGames from '../components/NextGames';
 import StandingsTable from '../components/StandingsTable';
 import Footer from '../components/Footer';
