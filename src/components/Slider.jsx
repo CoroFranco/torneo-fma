@@ -2,10 +2,12 @@ import { Link } from "react-router-dom";
 import { Copa, RightArrow, LeftArrow } from "./Icons";
 import useSlider from "../hooks/useSlider";
 import TeamSliderCard from "./TeamSliderCard";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { TeamsContext } from "../context/TeamsContext";
 
 
 export default function Slider () {
+  const {teams} = useContext(TeamsContext)
   const{scrollPrev, scrollNext, emblaRef} = useSlider()
   const[grabbing, setGrabbing] = useState(false)
   const handleGrab = () => {
@@ -31,11 +33,13 @@ export default function Slider () {
       >
       <div className="embla__viewport" ref={emblaRef}>
         <div className="embla__container">
-          <TeamSliderCard />
-          <TeamSliderCard />
-          <TeamSliderCard />
-          <TeamSliderCard />
-          <TeamSliderCard />      
+          {
+            teams.map(team => (
+              <div key={team.id}>
+                <TeamSliderCard team={team}/>
+              </div>
+            ))
+          }    
         </div>
       </div>
       <button className="embla__prev absolute top-[50%] left-10 bg-white p-2 rounded-4xl opacity-80 cursor-pointer" onClick={scrollPrev}>

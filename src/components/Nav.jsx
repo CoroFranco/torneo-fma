@@ -1,16 +1,20 @@
 import { motion } from "framer-motion"
 import { useState } from "react"
 import { Copa, HomeIcon, TrophyIcon, Calendar, UsersIcon, StatsIcon, CloseIcon } from "./Icons"
+import { NavLink } from "react-router-dom"
 
 export default function Nav({ onClose }) {
-  const [activeItem, setActiveItem] = useState("inicio")
+  const [activeItem, setActiveItem] = useState(() => {
+    const URL = window.location.pathname;  // Usamos pathname para obtener la ruta completa
+    return URL.substring(URL.lastIndexOf("/") + 1);  // Extrae la última parte después del "/"
+  });
 
   const menuItems = [
-    { id: "inicio", icon: <HomeIcon />, text: "Inicio", href: "/" },
-    { id: "equipos", icon: <TrophyIcon />, text: "Equipos", href: "/" },
-    { id: "calendario", icon: <Calendar />, text: "Calendario", href: "/" },
-    { id: "jugadores", icon: <UsersIcon />, text: "Jugadores", href: "/" },
-    { id: "estadisticas", icon: <StatsIcon />, text: "Estadísticas", href: "/" },
+    { id: "", icon: <HomeIcon />, text: "Inicio", href: "/" },
+    { id: "teams", icon: <TrophyIcon />, text: "Equipos", href: "/teams" },
+    { id: "calendario", icon: <Calendar />, text: "Calendario", href: "/calendario" },
+    { id: "jugadores", icon: <UsersIcon />, text: "Jugadores", href: "/players" },
+    { id: "estadisticas", icon: <StatsIcon />, text: "Estadísticas", href: "/stats" },
   ]
 
   return (
@@ -59,16 +63,12 @@ export default function Nav({ onClose }) {
           <ul className="space-y-1">
             {menuItems.map((item) => (
               <li key={item.id}>
-                <a
-                  href={item.href}
-                  className={`
-                    flex items-center gap-3 px-4 py-3 rounded-lg transition-all
-                    ${
-                      activeItem === item.id
-                        ? "bg-emerald-700/20 text-emerald-500"
-                        : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                    }
-                  `}
+                <NavLink
+                  to={item.href}
+                  className={({ isActive }) => `
+                  flex items-center gap-3 px-4 py-3 rounded-lg transition-all
+                  ${isActive ? "bg-emerald-700/20 text-emerald-500" : "text-slate-300 hover:bg-slate-800 hover:text-white"}
+                `}
                   onClick={() => {
                     setActiveItem(item.id)
                   }}
@@ -76,7 +76,7 @@ export default function Nav({ onClose }) {
                   {item.icon}
                   <span>{item.text}</span>
                   {activeItem === item.id && <div className="ml-auto w-1.5 h-5 bg-emerald-500 rounded-full" />}
-                </a>
+                </NavLink>
               </li>
             ))}
           </ul>
