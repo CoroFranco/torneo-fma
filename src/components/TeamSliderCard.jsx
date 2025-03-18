@@ -7,10 +7,10 @@ export default function TeamSliderCard({ team }) {
   const { nombre, directorTecnico, titulos } = team
 
   return (
-    <div className="embla__slide">
+    <div className="w-full">
       <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100   mx-auto">
         {/* Imagen de cabecera más grande */}
-        <div className="relative h-[280px] w-full">
+        <div className="relative h-full w-[400px]">
           <img className="w-full h-full" src={comark || "/placeholder.svg"} alt={`Equipo ${nombre}`} />
           {/* Overlay con gradiente para mejor legibilidad */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>

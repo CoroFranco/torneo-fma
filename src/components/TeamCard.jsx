@@ -86,7 +86,7 @@ export default function TeamCard({ team }) {
 
           <div className="flex items-center bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">
             <Users className="h-4 w-4 mr-1" />
-            <span className="text-sm font-medium">{jugadores.length} jugadores</span>
+            <span className="text-sm font-medium">{jugadores?.length} jugadores</span>
           </div>
         </div>
 
@@ -111,7 +111,7 @@ export default function TeamCard({ team }) {
               <div className="bg-gray-50 rounded-lg p-4">
                 <h4 className="font-medium text-gray-700 mb-3">Jugadores</h4>
 
-                {jugadores.length > 0 ? (
+                {jugadores?.length > 0 ? (
                   <ul className="space-y-2">
                     {jugadores.map((jugador) => (
                       <motion.li

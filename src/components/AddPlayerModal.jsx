@@ -1,14 +1,20 @@
 "use client"
 
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { X } from "lucide-react"
+import { TeamsContext } from "../context/TeamsContext"
+import { useParams } from "react-router-dom"
 
 export default function AddPlayerModal({ isOpen, onClose, onSave }) {
+  const {teamId} = useParams()
+  const {savePlayer} = useContext(TeamsContext)
+
   const [playerData, setPlayerData] = useState({
     nombre: "",
     posicion: "DELANTERO",
     edad: 18,
     dorsal: 1,
+    idEquipo: teamId
   })
 
   const handleChange = (e) => {
@@ -19,19 +25,22 @@ export default function AddPlayerModal({ isOpen, onClose, onSave }) {
     })
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    onSave(playerData)
-
-    // Reset form
-    setPlayerData({
-      nombre: "",
-      posicion: "DELANTERO",
-      edad: 18,
-      dorsal: 1,
-    })
-
-    onClose()
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const savedData = await savePlayer(playerData);
+      onSave(savedData.mensaje)
+      onClose();
+      setPlayerData({
+        nombre: "",
+        posicion: "DELANTERO",
+        edad: 18,
+        dorsal: 1,
+        idEquipo: teamId,
+      });
+    } catch (error) {
+      console.error("Error al guardar el jugador:", error);
+    }
   }
 
   if (!isOpen) return null

@@ -1,14 +1,30 @@
-import { useState } from "react"
+import { useState, useContext, useEffect } from "react"
 import { X, Upload, Plus, Trash2 } from "lucide-react"
+import { TeamsContext } from "../context/TeamsContext"
+import ErrorMessage from "./ErrorMessage"
+// Ajusta la ruta según tu estructura de proyecto
 
 export default function AddTeamModal({ isOpen, onClose, onSave }) {
+  const { saveTeam, isLoading: contextLoading } = useContext(TeamsContext)
+  
   const [teamData, setTeamData] = useState({
     nombre: "",
     directorTecnico: "",
     titulos: 0,
     imagenUrl: "",
-    jugadores: [],
+    jugadores: [] // Inicializar el array de jugadores
   })
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [saveProgress, setSaveProgress] = useState(0)
+
+  useEffect(() => {
+    const timeOut = setTimeout(() => {
+      setError(null)
+    }, 3000);
+
+    return () => clearTimeout(timeOut)
+  }, [error])
 
   const [newPlayer, setNewPlayer] = useState({
     nombre: "",
@@ -63,14 +79,35 @@ export default function AddTeamModal({ isOpen, onClose, onSave }) {
     })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    onSave(teamData)
-    onClose()
+    
+    // Validar datos antes de enviar
+    if (!teamData.nombre.trim()) {
+      setError("El nombre del equipo es obligatorio")
+      return
+    }
+
+    setIsLoading(true)
+    setError(null)
+    setSaveProgress(10)
+
+    try {
+      // Usar la función del contexto para guardar el equipo
+      const savedData = await saveTeam(teamData)
+      setSaveProgress(100)
+      onSave(savedData.mensaje || "Equipo guardado exitosamente")
+      onClose()
+    } catch (err) {
+      setError(err.message || "Ocurrió un error al guardar los datos")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   if (!isOpen) return null
 
+  // El resto del componente se mantiene igual
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -82,10 +119,26 @@ export default function AddTeamModal({ isOpen, onClose, onSave }) {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6">
+          {error && (
+            <ErrorMessage className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
+            </ErrorMessage>
+          )}
+          
+          {isLoading && (
+            <div className="mb-4">
+              <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1">
+                <div className="bg-emerald-600 h-2.5 rounded-full" style={{ width: `${saveProgress}%` }}></div>
+              </div>
+              <p className="text-sm text-gray-500">Guardando datos {saveProgress}%</p>
+            </div>
+          )}
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Equipo *</label>
               <input
+              style={{lineHeight: '20px'}}
                 type="text"
                 name="nombre"
                 value={teamData.nombre}
@@ -207,6 +260,7 @@ export default function AddTeamModal({ isOpen, onClose, onSave }) {
                 type="button"
                 onClick={addPlayer}
                 className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors flex items-center justify-center"
+                disabled={isLoading}
               >
                 <Plus size={18} className="mr-2" />
                 Agregar Jugador
@@ -214,7 +268,7 @@ export default function AddTeamModal({ isOpen, onClose, onSave }) {
             </div>
 
             {/* Lista de jugadores agregados */}
-            {teamData.jugadores.length > 0 ? (
+            {teamData.jugadores?.length > 0 ? (
               <div className="border border-gray-200 rounded-lg overflow-hidden">
                 <table className="w-full">
                   <thead className="bg-gray-50">
@@ -266,6 +320,7 @@ export default function AddTeamModal({ isOpen, onClose, onSave }) {
                             type="button"
                             onClick={() => removePlayer(player.id)}
                             className="text-red-600 hover:text-red-900"
+                            disabled={isLoading}
                           >
                             <Trash2 size={18} />
                           </button>
@@ -282,20 +337,32 @@ export default function AddTeamModal({ isOpen, onClose, onSave }) {
               </div>
             )}
           </div>
-
+          
           <div className="flex justify-end gap-3 border-t pt-6">
             <button
               type="button"
               onClick={onClose}
               className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              disabled={isLoading}
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
+              className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors flex items-center justify-center"
+              disabled={isLoading}
             >
-              Guardar Equipo
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Guardando...
+                </>
+              ) : (
+                "Guardar Equipo"
+              )}
             </button>
           </div>
         </form>
@@ -303,4 +370,3 @@ export default function AddTeamModal({ isOpen, onClose, onSave }) {
     </div>
   )
 }
-

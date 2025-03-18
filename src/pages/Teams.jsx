@@ -1,172 +1,29 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
 import Header from "../components/Header"
 import TeamCard from "../components/TeamCard"
 import AddTeamModal from "../components/AddTeamModal"
 import { Search, Filter, Trophy, Users } from "lucide-react"
 import { motion } from "framer-motion"
+import { TeamsContext } from "../context/TeamsContext"
+import SuccessMessage from "../components/SuccessMessage"
 
-// Datos de ejemplo basados en la estructura proporcionada
-const teamsData = [
-  {
-    id: 1,
-    nombre: "Cali",
-    directorTecnico: "Pecoso",
-    imagenUrl: "/placeholder.svg?height=300&width=500",
-    titulos: 10,
-    idTorneo: 0,
-    indicadorRespuesta: "Success",
-    mensaje: "",
-    jugadores: [
-      {
-        id: 1,
-        nombre: "Alex",
-        posicion: "DELANTERO",
-        edad: 26,
-        dorsal: 11,
-        indicadorRespuesta: null,
-        mensaje: null,
-      },
-      {
-        id: 2,
-        nombre: "Carlos",
-        posicion: "MEDIOCAMPISTA",
-        edad: 24,
-        dorsal: 8,
-        indicadorRespuesta: null,
-        mensaje: null,
-      },
-    ],
-  },
-  {
-    id: 2,
-    nombre: "América",
-    directorTecnico: "Jorge Luis",
-    imagenUrl: "/placeholder.svg?height=300&width=500",
-    titulos: 15,
-    idTorneo: 0,
-    indicadorRespuesta: "Success",
-    mensaje: "",
-    jugadores: [
-      {
-        id: 3,
-        nombre: "Martín",
-        posicion: "PORTERO",
-        edad: 29,
-        dorsal: 1,
-        indicadorRespuesta: null,
-        mensaje: null,
-      },
-      {
-        id: 4,
-        nombre: "Roberto",
-        posicion: "DEFENSA",
-        edad: 27,
-        dorsal: 4,
-        indicadorRespuesta: null,
-        mensaje: null,
-      },
-    ],
-  },
-  {
-    id: 3,
-    nombre: "Nacional",
-    directorTecnico: "Alejandro",
-    imagenUrl: "/placeholder.svg?height=300&width=500",
-    titulos: 8,
-    idTorneo: 0,
-    indicadorRespuesta: "Success",
-    mensaje: "",
-    jugadores: [
-      {
-        id: 5,
-        nombre: "Diego",
-        posicion: "DELANTERO",
-        edad: 23,
-        dorsal: 9,
-        indicadorRespuesta: null,
-        mensaje: null,
-      },
-    ],
-  },
-  {
-    id: 4,
-    nombre: "Millonarios",
-    directorTecnico: "Alberto",
-    imagenUrl: "/placeholder.svg?height=300&width=500",
-    titulos: 12,
-    idTorneo: 0,
-    indicadorRespuesta: "Success",
-    mensaje: "",
-    jugadores: [
-      {
-        id: 6,
-        nombre: "Juan",
-        posicion: "MEDIOCAMPISTA",
-        edad: 25,
-        dorsal: 10,
-        indicadorRespuesta: null,
-        mensaje: null,
-      },
-    ],
-  },
-  {
-    id: 5,
-    nombre: "Junior",
-    directorTecnico: "Hernán",
-    imagenUrl: "/placeholder.svg?height=300&width=500",
-    titulos: 6,
-    idTorneo: 0,
-    indicadorRespuesta: "Success",
-    mensaje: "",
-    jugadores: [
-      {
-        id: 7,
-        nombre: "Luis",
-        posicion: "DEFENSA",
-        edad: 28,
-        dorsal: 2,
-        indicadorRespuesta: null,
-        mensaje: null,
-      },
-    ],
-  },
-  {
-    id: 6,
-    nombre: "Santa Fe",
-    directorTecnico: "Eduardo",
-    imagenUrl: "/placeholder.svg?height=300&width=500",
-    titulos: 9,
-    idTorneo: 0,
-    indicadorRespuesta: "Success",
-    mensaje: "",
-    jugadores: [
-      {
-        id: 8,
-        nombre: "Pedro",
-        posicion: "PORTERO",
-        edad: 30,
-        dorsal: 1,
-        indicadorRespuesta: null,
-        mensaje: null,
-      },
-    ],
-  },
-]
+
 
 export default function Teams() {
-  const [teams, setTeams] = useState(teamsData)
+  const { teams } = useContext(TeamsContext)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterBy, setFilterBy] = useState("todos")
   const [isLoading, setIsLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [successMessage, setSuccessMessage] = useState(null)
 
   // Simular carga de datos
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false)
-    }, 800)
+    }, 500)
     return () => clearTimeout(timer)
   }, [])
 
@@ -174,8 +31,7 @@ export default function Teams() {
   const filteredTeams = teams.filter((team) => {
     const matchesSearch =
       team.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      team.directorTecnico.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      team.jugadores.some((jugador) => jugador.nombre.toLowerCase().includes(searchTerm.toLowerCase()))
+      team.directorTecnico.toLowerCase().includes(searchTerm.toLowerCase())
 
     if (filterBy === "todos") return matchesSearch
     if (filterBy === "conTitulos") return matchesSearch && team.titulos > 0
@@ -185,17 +41,17 @@ export default function Teams() {
   })
 
   // Manejar guardado de nuevo equipo
-  const handleSaveTeam = (newTeam) => {
-    const teamWithId = {
-      ...newTeam,
-      id: teams.length + 1,
-      idTorneo: 0,
-      indicadorRespuesta: "Success",
-      mensaje: "",
-    }
-
-    setTeams([...teams, teamWithId])
+  const handleSaveTeam = (message) => {
+    setSuccessMessage(message)
   }
+
+  useEffect (() => {
+    const timeOut = setTimeout(() => {
+      setSuccessMessage(null)
+    }, 3000);
+
+    return () => clearTimeout(timeOut)
+  }, [successMessage])
 
   // Animación para los elementos
   const container = {
@@ -215,7 +71,12 @@ export default function Teams() {
 
   // Calcular estadísticas
   const totalTitulos = teams.reduce((total, team) => total + team.titulos, 0)
-  const totalJugadores = teams.reduce((total, team) => total + team.jugadores.length, 0)
+  const totalJugadores = teams.reduce((total, team) => {
+    if(team.jugadores){
+      return total + team.jugadores.length, 0
+    }
+    return 0
+  }, 0)
 
   return (
     <div className="min-h-screen bg-emerald-50">
@@ -231,7 +92,7 @@ export default function Teams() {
           </p>
         </div>
       </div>
-
+      {successMessage && <SuccessMessage>{successMessage}</SuccessMessage>}
       {/* Filtros y búsqueda */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
@@ -386,7 +247,7 @@ export default function Teams() {
       </div>
 
       {/* Modal para agregar equipo */}
-      <AddTeamModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSaveTeam} />
+      <AddTeamModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSaveTeam}/>
     </div>
   )
 }
